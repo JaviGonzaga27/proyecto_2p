@@ -63,7 +63,7 @@ class ProductoController extends Controller
     public function store(ValidarStoreProducto $request)
     {
         // Crea el producto con los datos validados
-        Producto::create($request->validated()->only(['nombre', 'codigo', 'cantidad', 'precio']));
+        Producto::create($request->validated());
 
         // Redirecciona con mensaje de éxito
         return redirect()->route('productos.index')->with('success', 'Producto creado correctamente');
@@ -90,7 +90,7 @@ class ProductoController extends Controller
      */
     public function update(ValidarEditProducto $request, Producto $producto)
     {
-        $producto->update($request->validated()->only(['nombre', 'codigo', 'cantidad', 'precio']));
+        $producto->update($request->validated());
 
         return redirect()->route('productos.index')->with('success', 'Producto actualizado correctamente');
     }

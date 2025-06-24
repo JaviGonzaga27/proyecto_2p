@@ -22,10 +22,12 @@ class ValidarEditProducto extends FormRequest
      */
     public function rules(): array
     {
+        $productoId = $this->route('producto')->id ?? null;
+
         return [
-            'nombre' => 'required|unique:productos,nombre',
-            'codigo' => 'required|string|max:5|unique:productos,codigo',
-            'cantidad' => 'required|numeric|min:10',
+            'nombre' => 'required|unique:productos,nombre,' . $productoId,
+            'codigo' => 'required|string|max:5|unique:productos,codigo,' . $productoId,
+            'cantidad' => 'required|numeric',
             'precio' => 'required',
         ];
     }
@@ -41,7 +43,6 @@ class ValidarEditProducto extends FormRequest
             'codigo.unique' => 'El código del producto ya está en uso.',
             'cantidad.required' => 'La cantidad del producto es obligatoria.',
             'cantidad.numeric' => 'La cantidad debe ser un número.',
-            'cantidad.min' => 'La cantidad mínima es 10.',
             'precio.required' => 'El precio del producto es obligatorio.',
         ];
     }

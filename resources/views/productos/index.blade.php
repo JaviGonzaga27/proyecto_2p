@@ -1,185 +1,263 @@
 @extends('layouts.app')
 @section('content')
-    <div class="container-fluid px-4">
-        <!-- Header Section -->
-        <div class="row mb-4">
-            <div class="col">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h1 class="h3 mb-1 text-dark fw-bold">Productos</h1>
-                        <p class="text-muted mb-0">Gestiona el inventario de productos</p>
-                    </div>
-                    <a href="{{ route('productos.create') }}" class="btn btn-primary btn-lg">
-                        <i class="fas fa-plus me-2"></i> Nuevo Producto
-                    </a>
-                </div>
+    <!-- Begin Page Content -->
+    <div class="container-fluid">
+
+        <!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h1 class="h3 mb-0 text-gray-800">Productos</h1>
+                <p class="mb-0 text-gray-600">Gestiona el inventario de productos de tu negocio</p>
             </div>
+            <a href="{{ route('productos.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                <i class="fas fa-plus fa-sm text-white-50"></i> Nuevo Producto
+            </a>
         </div>
 
-        <!-- Filters Card -->
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-body py-3">
-                <div class="row g-3 align-items-center">
-                    <!-- Search -->
-                    <div class="col-md-6">
-                        <form method="GET" action="{{ route('productos.index') }}" class="d-flex">
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0">
-                                    <i class="fas fa-search text-muted"></i>
-                                </span>
-                                <input type="text" name="search" class="form-control border-start-0 ps-0"
-                                    placeholder="Buscar productos..." value="{{ request('search') }}" autocomplete="off">
-                                <input type="hidden" name="per_page" value="{{ $perPage }}">
-                            </div>
-                            @if (request('search'))
-                                <a href="{{ route('productos.index') }}?per_page={{ $perPage }}"
-                                    class="btn btn-outline-secondary ms-2">
-                                    <i class="fas fa-times"></i>
-                                </a>
-                            @endif
-                        </form>
-                    </div>
+        <!-- Content Row -->
+        <div class="row">
+            <div class="col-xl-12">
 
-                    <!-- Per Page Selector -->
-                    <div class="col-md-6">
-                        <div class="d-flex justify-content-md-end align-items-center">
-                            <label class="form-label mb-0 me-2 text-muted small">Mostrar:</label>
-                            <select name="per_page" id="per_page" class="form-select form-select-sm w-auto"
-                                onchange="changePerPage(this.value)">
-                                <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10</option>
-                                <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25</option>
-                                <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>
-                            </select>
+                <!-- Filters Card -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Filtros de Búsqueda</h6>
+                        <div class="dropdown no-arrow">
+                            <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                                aria-labelledby="dropdownMenuLink">
+                                <div class="dropdown-header">Opciones:</div>
+                                <a class="dropdown-item" href="{{ route('productos.index') }}">Limpiar filtros</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Search Form -->
+                            <div class="col-lg-8 mb-3 mb-lg-0">
+                                <form method="GET" action="{{ route('productos.index') }}" class="form-inline">
+                                    <div class="input-group w-100">
+                                        <input type="text" name="search" class="form-control bg-light border-0 small"
+                                            placeholder="Buscar productos por nombre o código..."
+                                            value="{{ request('search') }}" autocomplete="off">
+                                        <input type="hidden" name="per_page" value="{{ $perPage }}">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary" type="submit">
+                                                <i class="fas fa-search fa-sm"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Per Page Selector -->
+                            <div class="col-lg-4">
+                                <div class="form-group mb-0">
+                                    <label class="small text-gray-900 mr-2">Mostrar:</label>
+                                    <select name="per_page" id="per_page" class="form-control form-control-sm"
+                                        onchange="changePerPage(this.value)" style="width: auto; display: inline-block;">
+                                        <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10</option>
+                                        <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25</option>
+                                        <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50</option>
+                                    </select>
+                                    <span class="small text-gray-900 ml-1">registros</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Search Results Alert -->
-        @if (request('search'))
-            <div class="alert alert-info border-0 bg-info bg-opacity-10 mb-4">
-                <div class="d-flex align-items-center">
-                    <i class="fas fa-info-circle text-info me-2"></i>
-                    <div>
-                        <strong>{{ $productos->total() }}</strong> resultado(s) para
+                <!-- Search Results Alert -->
+                @if (request('search'))
+                    <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <strong>{{ $productos->total() }}</strong> resultado(s) encontrado(s) para
                         <strong>"{{ request('search') }}"</strong>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
-                </div>
-            </div>
-        @endif
+                @endif
 
-        <!-- Products Table -->
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="border-0 py-3 px-4 fw-semibold text-muted">ID</th>
-                                <th class="border-0 py-3 fw-semibold text-muted">Producto</th>
-                                <th class="border-0 py-3 fw-semibold text-muted">Código</th>
-                                <th class="border-0 py-3 fw-semibold text-muted text-center">Cantidad</th>
-                                <th class="border-0 py-3 fw-semibold text-muted text-end">Precio</th>
-                                <th class="border-0 py-3 fw-semibold text-muted">Creado</th>
-                                <th class="border-0 py-3 fw-semibold text-muted text-center">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($productos as $producto)
-                                <tr>
-                                    <td class="py-3 px-4 text-muted">#{{ $producto->id }}</td>
-                                    <td class="py-3">
-                                        <div class="fw-semibold text-dark">{{ $producto->nombre }}</div>
-                                    </td>
-                                    <td class="py-3">
-                                        <span class="badge bg-light text-dark border">{{ $producto->codigo }}</span>
-                                    </td>
-                                    <td class="py-3 text-center">
-                                        <span
-                                            class="badge text-white {{ $producto->cantidad > 10 ? 'bg-success' : ($producto->cantidad > 0 ? 'bg-warning' : 'bg-danger') }}">
-                                            {{ $producto->cantidad }} unidad{{ $producto->cantidad != 1 ? 'es' : '' }}
-                                        </span>
-                                    </td>
-                                    <td class="py-3 text-end fw-semibold">${{ number_format($producto->precio, 2) }}</td>
-                                    <td class="py-3 text-muted small">
-                                        {{ $producto->created_at ? $producto->created_at->format('d/m/Y') : 'N/A' }}
-                                    </td>
-                                    <td class="py-3 text-center">
-                                        <div class="btn-group" role="group">
-                                            <!-- Botón Ver -->
-                                            <a href="{{ route('productos.show', $producto) }}" class="btn btn-sm btn-outline-primary"
-                                                style="margin-right: 10px" title="Ver">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <!-- Botón Editar -->
-                                            <a href="{{ route('productos.edit', $producto) }}" class="btn btn-sm btn-outline-warning"
-                                                style="margin-right: 10px" title="Editar">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <!-- Botón Eliminar -->
-                                            <form action="{{ route('productos.destroy', $producto) }}" method="POST"
-                                                style="display:inline;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar"
-                                                    onclick="return confirm('¿Seguro que deseas eliminar este producto?')">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7" class="py-5 text-center">
-                                        <div class="text-muted">
-                                            <i class="fas fa-box-open fa-3x mb-3 text-muted opacity-50"></i>
-                                            <p class="mb-0">
-                                                @if (request('search'))
-                                                    No se encontraron productos para "{{ request('search') }}"
-                                                @else
-                                                    No hay productos registrados
-                                                @endif
-                                            </p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                <!-- Clear Search -->
+                @if (request('search'))
+                    <div class="mb-3">
+                        <a href="{{ route('productos.index') }}?per_page={{ $perPage }}"
+                           class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-times mr-1"></i> Limpiar búsqueda
+                        </a>
+                    </div>
+                @endif
 
-            <!-- Pagination Footer -->
-            @if ($productos->hasPages() || $productos->total() > 0)
-                <div class="card-footer bg-transparent border-0 py-3">
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
+                <!-- DataTales Example -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            Lista de Productos
                             @if ($productos->total() > 0)
-                                <small class="text-muted">
-                                    Mostrando <strong>{{ $productos->firstItem() }}</strong> a
-                                    <strong>{{ $productos->lastItem() }}</strong> de
-                                    <strong>{{ $productos->total() }}</strong> productos
-                                    @if (request('search'))
-                                        <span class="ms-1">(filtrados)</span>
-                                    @endif
-                                </small>
+                                <span class="badge badge-primary ml-2">{{ $productos->total() }}</span>
                             @endif
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Producto</th>
+                                        <th>Código</th>
+                                        <th class="text-center">Stock</th>
+                                        <th class="text-right">Precio</th>
+                                        <th>Fecha Creación</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($productos as $producto)
+                                        <tr>
+                                            <td class="text-gray-900 font-weight-bold">#{{ $producto->id }}</td>
+                                            <td>
+                                                <div class="font-weight-bold text-primary">{{ $producto->nombre }}</div>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-light">{{ $producto->codigo }}</span>
+                                            </td>
+                                            <td class="text-center">
+                                                @if($producto->cantidad > 10)
+                                                    <span class="badge badge-success" style="font-size: 15px;">
+                                                        {{ $producto->cantidad }} unidad{{ $producto->cantidad != 1 ? 'es' : '' }}
+                                                    </span>
+                                                @elseif($producto->cantidad > 0)
+                                                    <span class="badge badge-warning" style="font-size: 15px;">
+                                                        {{ $producto->cantidad }} unidad{{ $producto->cantidad != 1 ? 'es' : '' }}
+                                                    </span>
+                                                @else
+                                                    <span class="badge badge-danger" style="font-size: 15px;">Sin stock</span>
+                                                @endif
+                                            </td>
+                                            <td class="text-right font-weight-bold text-gray-900">
+                                                ${{ number_format($producto->precio, 2) }}
+                                            </td>
+                                            <td class="text-gray-600 small">
+                                                {{ $producto->created_at ? $producto->created_at->format('d/m/Y') : 'N/A' }}
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="btn-group" role="group">
+                                                    <!-- Botón Ver -->
+                                                    <a href="{{ route('productos.show', $producto) }}"
+                                                       class="btn btn-sm btn-outline-primary mr-1" title="Ver detalles">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <!-- Botón Editar -->
+                                                    <a href="{{ route('productos.edit', $producto) }}"
+                                                       class="btn btn-outline-warning btn-sm mr-1" title="Editar">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <!-- Botón Eliminar -->
+                                                    <button type="button" class="btn btn-outline-danger btn-sm mr-1" data-toggle="modal" data-target="#confirmarEliminarModal">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="7" class="text-center py-5">
+                                                <div class="text-gray-500">
+                                                    <i class="fas fa-box-open fa-3x mb-3"></i>
+                                                    <h5 class="text-gray-600">
+                                                        @if (request('search'))
+                                                            No se encontraron productos
+                                                        @else
+                                                            No hay productos registrados
+                                                        @endif
+                                                    </h5>
+                                                    <p class="text-gray-500">
+                                                        @if (request('search'))
+                                                            Intenta con otros términos de búsqueda
+                                                        @else
+                                                            Comienza creando tu primer producto
+                                                        @endif
+                                                    </p>
+                                                    @if (!request('search'))
+                                                        <a href="{{ route('productos.create') }}" class="btn btn-primary btn-sm">
+                                                            <i class="fas fa-plus mr-1"></i> Crear Producto
+                                                        </a>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="col-md-6">
-                            <div class="d-flex justify-content-md-end mt-2 mt-md-0">
-                                {{ $productos->links() }}
+                    </div>
+
+                    <!-- Pagination Footer -->
+                    @if ($productos->hasPages() || $productos->total() > 0)
+                        <div class="card-footer">
+                            <div class="row align-items-center">
+                                <div class="col-sm-12 col-md-5">
+                                    @if ($productos->total() > 0)
+                                        <div class="dataTables_info text-gray-700 small">
+                                            Mostrando <strong>{{ $productos->firstItem() }}</strong> a
+                                            <strong>{{ $productos->lastItem() }}</strong> de
+                                            <strong>{{ $productos->total() }}</strong> productos
+                                            @if (request('search'))
+                                                <span class="text-muted">(filtrados)</span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="col-sm-12 col-md-7">
+                                    <div class="dataTables_paginate paging_simple_numbers">
+                                        {{ $productos->links() }}
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    @endif
                 </div>
-            @endif
+
+            </div>
         </div>
+
+    </div>
+    <!-- /.container-fluid -->
+
+    <!-- Modal de Confirmación -->
+    <div class="modal fade" id="confirmarEliminarModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalLabel">¿Seguro que quieres eliminar?</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Esta acción no se puede deshacer.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            <!-- Formulario para eliminar -->
+            <form method="POST" action="{{ route('productos.destroy', $producto) }}">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger">Eliminar</button>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
         function changePerPage(value) {
+            // Validación del valor
             if (!/^\d+$/.test(value)) {
                 alert('Por favor, seleccione un valor válido.');
                 return;
@@ -191,12 +269,14 @@
                 return;
             }
 
+            // Construir nueva URL
             const url = new URL(window.location);
             url.searchParams.set('per_page', value);
-            url.searchParams.delete('page');
+            url.searchParams.delete('page'); // Reset page to 1
             window.location.href = url.toString();
         }
 
+        // Validación del campo per_page
         document.getElementById('per_page').addEventListener('change', function() {
             const value = this.value;
             if (!/^\d+$/.test(value)) {
@@ -205,15 +285,18 @@
             }
         });
 
+        // Auto-submit en búsqueda al presionar Enter
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.querySelector('input[name="search"]');
 
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    this.closest('form').submit();
-                }
-            });
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.closest('form').submit();
+                    }
+                });
+            }
         });
     </script>
 @endsection

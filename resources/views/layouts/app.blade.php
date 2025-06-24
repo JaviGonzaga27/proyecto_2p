@@ -182,7 +182,7 @@
 
                 <!-- Begin Page Content -->
 
-                @if ($errors->any())
+                <!-- @if ($errors->any())
                     <div class="container alert alert-danger">
                         <ul>
                             @foreach ($errors->all() as $error)
@@ -190,7 +190,7 @@
                             @endforeach
                         </ul>
                     </div>
-                @endif
+                @endif -->
                 @yield('content')
                 <!-- /.container-fluid -->
 
