@@ -77,10 +77,34 @@
             </div>
 
             <!-- Elemento de navegación - Productos -->
-            <li class="nav-item {{ request()->routeIs('productos.*') ? 'active' : '' }}">
+            <li class="nav-item {{ request()->routeIs('productos.index') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('productos.index') }}">
                     <i class="fas fa-fw fa-boxes"></i>
                     <span>Listado de productos</span>
+                </a>
+            </li>
+
+            <!-- Elemento de navegación - Productos eliminados -->
+            <li class="nav-item {{ request()->routeIs('productos.eliminados') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('productos.eliminados') }}">
+                    <i class="fas fa-fw fa-trash"></i>
+                    <span>Productos eliminados</span>
+                </a>
+            </li>
+
+            <!-- Separador -->
+            <hr class="sidebar-divider">
+
+            <!-- Encabezado para el apartado de auditoria -->
+            <div class="sidebar-heading">
+                Auditoría
+            </div>
+
+            <!-- Elemento de navegación - Auditoría -->
+            <li class="nav-item {{ request()->routeIs('productos.auditoria') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('productos.auditoria') }}">
+                    <i class="fas fa-fw fa-history"></i>
+                    <span>Registro de auditoría</span>
                 </a>
             </li>
 
@@ -186,8 +210,8 @@
                     <div class="container alert alert-danger">
                         <ul>
                             @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
+<li>{{ $error }}</li>
+@endforeach
                         </ul>
                     </div>
                 @endif -->

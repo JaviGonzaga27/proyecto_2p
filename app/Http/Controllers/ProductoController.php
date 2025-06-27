@@ -6,6 +6,10 @@ use App\Models\Producto;
 use Illuminate\Http\Request;
 use App\Http\Requests\ValidarStoreProducto;
 use App\Http\Requests\ValidarEditProducto;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use App\Services\AuditoriaService;
+use App\Models\AuditoriaProducto;
 
 class ProductoController extends Controller
 {
@@ -62,11 +66,22 @@ class ProductoController extends Controller
      */
     public function store(ValidarStoreProducto $request)
     {
-        // Crea el producto con los datos validados
-        Producto::create($request->validated());
+        DB::beginTransaction();
 
-        // Redirecciona con mensaje de éxito
-        return redirect()->route('productos.index')->with('success', 'Producto creado correctamente');
+        try {
+            // Crear el producto
+            $producto = Producto::create($request->validated());
+
+            // Registrar auditoría de creación
+            AuditoriaService::registrarCreacion($producto, 'Producto creado desde el formulario');
+
+            DB::commit();
+            return redirect()->route('productos.index')->with('success', 'Producto creado correctamente');
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Error al crear el producto: ' . $th->getMessage());
+        }
     }
 
     /**
@@ -90,7 +105,13 @@ class ProductoController extends Controller
      */
     public function update(ValidarEditProducto $request, Producto $producto)
     {
+        // Guardar datos anteriores para auditoría
+        $datosAnteriores = $producto->toArray();
+
         $producto->update($request->validated());
+
+        // Registrar auditoría de actualización
+        AuditoriaService::registrarActualizacion($producto, $datosAnteriores, 'Producto actualizado desde el formulario de edición');
 
         return redirect()->route('productos.index')->with('success', 'Producto actualizado correctamente');
     }
@@ -100,8 +121,67 @@ class ProductoController extends Controller
      */
     public function destroy(Producto $producto)
     {
-        $producto->delete();
+        // Registrar auditoría antes de eliminar
+        AuditoriaService::registrarEliminacion(
+            $producto,
+            'Producto eliminado desde el listado principal'
+        );
 
+        $producto->delete(); // Esto solo marca como eliminado (soft delete)
         return redirect()->route('productos.index')->with('success', 'Producto eliminado correctamente');
+    }
+
+    /**
+     * Display a listing of the deleted products.
+     */
+    public function eliminados() {
+        $productosEliminados = Producto::onlyTrashed()->get();
+        return view('productos.eliminados', compact('productosEliminados'));
+    }
+
+    /**
+     * Restore a deleted product.
+     */
+    public function restore(Request $request, $id)
+    {
+        $producto = Producto::onlyTrashed()->findOrFail($id);
+
+        // Obtener la razón de la restauración del request
+        $razon = $request->input('razon_restauracion', 'Producto restaurado desde la lista de eliminados');
+
+        // Registrar auditoría antes de restaurar
+        AuditoriaService::registrarRestauracion($producto, $razon);
+
+        $producto->restore();
+        return redirect()->route('productos.index')->with('success', 'Producto restaurado correctamente');
+    }
+
+    /**
+     * Permanently remove a deleted product from storage.
+     */
+    public function forceDestroy(Request $request, $id)
+    {
+        $producto = Producto::onlyTrashed()->findOrFail($id);
+
+        // Obtener la razón de la eliminación permanente del request
+        $razon = $request->input('razon_eliminacion', 'Producto eliminado permanentemente desde la lista de eliminados');
+
+        // Registrar auditoría antes de eliminar permanentemente
+        AuditoriaService::registrarEliminacionPermanente($producto, $razon);
+
+        $producto->forceDelete();
+        return redirect()->route('productos.eliminados')->with('success', 'Producto eliminado permanentemente');
+    }
+
+    /**
+     * Display audit history for products.
+     */
+    public function auditoria()
+    {
+        $auditorias = AuditoriaProducto::with(['usuario', 'producto'])
+            ->orderBy('fecha_evento', 'desc')
+            ->paginate(20);
+
+        return view('productos.auditoria', compact('auditorias'));
     }
 }

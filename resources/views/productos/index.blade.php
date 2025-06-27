@@ -158,9 +158,118 @@
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             <!-- Botón Eliminar -->
-                                            <button type="button" class="btn btn-outline-danger btn-sm mr-1" data-toggle="modal" data-target="#confirmarEliminarModal">
+                                            <button type="button" class="btn btn-outline-danger btn-sm mr-1" data-toggle="modal" data-target="#confirmarEliminarModal{{ $producto->id }}">
                                                 <i class="fas fa-trash-alt"></i>
                                             </button>
+
+                                            <!-- Modal de Confirmación Eliminacion -->
+                                            <div class="modal fade" id="confirmarEliminarModal{{ $producto->id }}" tabindex="-1" role="dialog" aria-labelledby="modalLabel{{ $producto->id }}" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header bg-danger text-white">
+                                                            <h5 class="modal-title" id="modalLabel{{ $producto->id }}">
+                                                                <i class="fas fa-exclamation-triangle mr-2"></i>
+                                                                Confirmar Eliminación
+                                                            </h5>
+                                                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div class="alert alert-warning" role="alert">
+                                                                <i class="fas fa-exclamation-circle mr-2"></i>
+                                                                <strong>¡Atención!</strong> Esta acción no se puede deshacer.
+                                                            </div>
+
+                                                            <div class="mb-3">
+                                                                <h6 class="font-weight-bold text-gray-800">Producto a eliminar:</h6>
+                                                                <div class="card bg-light">
+                                                                    <div class="card-body py-2">
+                                                                        <div class="row">
+                                                                            <div class="col-12">
+                                                                                <strong>Nombre:</strong> {{ $producto->nombre }}<br>
+                                                                                <strong>Código:</strong> <span class="badge badge-secondary">{{ $producto->codigo }}</span><br>
+                                                                                <strong>Stock:</strong> {{ $producto->cantidad }} unidades<br>
+                                                                                <strong>Precio:</strong> ${{ number_format($producto->precio, 2) }}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                <label for="codigoConfirmacion{{ $producto->id }}" class="font-weight-bold text-gray-800">
+                                                                    Para confirmar, escribe el código del producto:
+                                                                    <span class="text-danger">{{ $producto->codigo }}</span>
+                                                                </label>
+                                                                <input type="text"
+                                                                       class="form-control"
+                                                                       id="codigoConfirmacion{{ $producto->id }}"
+                                                                       placeholder="Escribe aquí: {{ $producto->codigo }}"
+                                                                       autocomplete="off">
+                                                                <small class="form-text text-muted">
+                                                                    Esto ayuda a prevenir eliminaciones accidentales.
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                                                <i class="fas fa-times mr-1"></i>
+                                                                Cancelar
+                                                            </button>
+                                                            <form method="POST" action="{{ route('productos.destroy', $producto) }}" id="formEliminar{{ $producto->id }}">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit"
+                                                                        class="btn btn-danger"
+                                                                        id="btnEliminar{{ $producto->id }}"
+                                                                        disabled>
+                                                                    <i class="fas fa-trash-alt mr-1"></i>
+                                                                    Eliminar Producto
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <script>
+                                                // Script para validar el código antes de permitir eliminación
+                                                document.getElementById('codigoConfirmacion{{ $producto->id }}').addEventListener('input', function() {
+                                                    const codigoIngresado = this.value.trim();
+                                                    const codigoRequerido = '{{ $producto->codigo }}';
+                                                    const btnEliminar = document.getElementById('btnEliminar{{ $producto->id }}');
+
+                                                    if (codigoIngresado === codigoRequerido) {
+                                                        btnEliminar.disabled = false;
+                                                        btnEliminar.classList.remove('btn-secondary');
+                                                        btnEliminar.classList.add('btn-danger');
+                                                        this.classList.remove('is-invalid');
+                                                        this.classList.add('is-valid');
+                                                    } else {
+                                                        btnEliminar.disabled = true;
+                                                        btnEliminar.classList.remove('btn-danger');
+                                                        btnEliminar.classList.add('btn-secondary');
+                                                        this.classList.remove('is-valid');
+                                                        if (codigoIngresado.length > 0) {
+                                                            this.classList.add('is-invalid');
+                                                        } else {
+                                                            this.classList.remove('is-invalid');
+                                                        }
+                                                    }
+                                                });
+
+                                                // Limpiar el campo cuando se cierra el modal
+                                                $('#confirmarEliminarModal{{ $producto->id }}').on('hidden.bs.modal', function () {
+                                                    const input = document.getElementById('codigoConfirmacion{{ $producto->id }}');
+                                                    const btn = document.getElementById('btnEliminar{{ $producto->id }}');
+                                                    input.value = '';
+                                                    input.classList.remove('is-valid', 'is-invalid');
+                                                    btn.disabled = true;
+                                                    btn.classList.remove('btn-danger');
+                                                    btn.classList.add('btn-secondary');
+                                                });
+                                            </script>
                                         </div>
                                     </td>
                                 </tr>
@@ -228,32 +337,6 @@
 
 </div>
 <!-- /.container-fluid -->
-
-<!-- Modal de Confirmación -->
-<div class="modal fade" id="confirmarEliminarModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalLabel">¿Seguro que quieres eliminar?</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                Esta acción no se puede deshacer.
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                <!-- Formulario para eliminar -->
-                <form method="POST" action="{{ route('productos.destroy', $producto) }}">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Eliminar</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
 <script>
     function changePerPage(value) {

@@ -130,11 +130,11 @@
                                     </td>
                                     <td class="text-center">
                                         @if($usuario->email_verified_at)
-                                        <span class="badge badge-success" style="font-size: 12px;">
+                                        <span class="badge badge-success" style="font-size: 16px;">
                                             <i class="fas fa-check-circle mr-1"></i>Verificado
                                         </span>
                                         @else
-                                        <span class="badge badge-warning" style="font-size: 12px;">
+                                        <span class="badge badge-warning" style="font-size: 16px;">
                                             <i class="fas fa-clock mr-1"></i>Pendiente
                                         </span>
                                         @endif
