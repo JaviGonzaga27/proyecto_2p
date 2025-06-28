@@ -119,12 +119,25 @@ class ProductoController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Producto $producto)
+    public function destroy(Request $request, Producto $producto)
     {
+        // Validar la razón si se proporciona
+        $request->validate([
+            'razon' => 'nullable|string|max:500'
+        ]);
+
+        // Capturar la razón desde el request o usar mensaje por defecto
+        $razon = $request->input('razon', 'Producto eliminado desde el listado principal');
+
+        // Si hay razón del usuario, agregar contexto
+        if ($request->filled('razon')) {
+            $razon = 'Eliminación desde índice - Razón: ' . $request->input('razon');
+        }
+
         // Registrar auditoría antes de eliminar
         AuditoriaService::registrarEliminacion(
             $producto,
-            'Producto eliminado desde el listado principal'
+            $razon
         );
 
         $producto->delete(); // Esto solo marca como eliminado (soft delete)

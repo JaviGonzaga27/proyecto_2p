@@ -203,12 +203,27 @@
                                                                     <span class="text-danger">{{ $producto->codigo }}</span>
                                                                 </label>
                                                                 <input type="text"
-                                                                       class="form-control"
-                                                                       id="codigoConfirmacion{{ $producto->id }}"
-                                                                       placeholder="Escribe aquí: {{ $producto->codigo }}"
-                                                                       autocomplete="off">
+                                                                    class="form-control"
+                                                                    id="codigoConfirmacion{{ $producto->id }}"
+                                                                    placeholder="Escribe aquí: {{ $producto->codigo }}"
+                                                                    autocomplete="off">
                                                                 <small class="form-text text-muted">
                                                                     Esto ayuda a prevenir eliminaciones accidentales.
+                                                                </small>
+                                                            </div>
+
+                                                            <!-- Campo para comentario/razón -->
+                                                            <div class="form-group">
+                                                                <label for="razonEliminacion{{ $producto->id }}" class="font-weight-bold text-gray-800">
+                                                                    Razón de eliminación <span class="text-muted">(opcional)</span>:
+                                                                </label>
+                                                                <textarea class="form-control"
+                                                                          id="razonEliminacion{{ $producto->id }}"
+                                                                          name="razon"
+                                                                          rows="3"
+                                                                          placeholder="Describe brevemente por qué eliminas este producto..."></textarea>
+                                                                <small class="form-text text-muted">
+                                                                    Este comentario se guardará en el registro de auditoría.
                                                                 </small>
                                                             </div>
                                                         </div>
@@ -220,10 +235,12 @@
                                                             <form method="POST" action="{{ route('productos.destroy', $producto) }}" id="formEliminar{{ $producto->id }}">
                                                                 @csrf
                                                                 @method('DELETE')
+                                                                <!-- Campo oculto para la razón -->
+                                                                <input type="hidden" name="razon" id="razonHidden{{ $producto->id }}">
                                                                 <button type="submit"
-                                                                        class="btn btn-danger"
-                                                                        id="btnEliminar{{ $producto->id }}"
-                                                                        disabled>
+                                                                    class="btn btn-danger"
+                                                                    id="btnEliminar{{ $producto->id }}"
+                                                                    disabled>
                                                                     <i class="fas fa-trash-alt mr-1"></i>
                                                                     Eliminar Producto
                                                                 </button>
@@ -259,11 +276,20 @@
                                                     }
                                                 });
 
+                                                // Capturar la razón antes de enviar el formulario
+                                                document.getElementById('formEliminar{{ $producto->id }}').addEventListener('submit', function() {
+                                                    const razon = document.getElementById('razonEliminacion{{ $producto->id }}').value;
+                                                    document.getElementById('razonHidden{{ $producto->id }}').value = razon;
+                                                });
+
                                                 // Limpiar el campo cuando se cierra el modal
                                                 $('#confirmarEliminarModal{{ $producto->id }}').on('hidden.bs.modal', function () {
                                                     const input = document.getElementById('codigoConfirmacion{{ $producto->id }}');
+                                                    const textarea = document.getElementById('razonEliminacion{{ $producto->id }}');
                                                     const btn = document.getElementById('btnEliminar{{ $producto->id }}');
+                                                    
                                                     input.value = '';
+                                                    textarea.value = '';
                                                     input.classList.remove('is-valid', 'is-invalid');
                                                     btn.disabled = true;
                                                     btn.classList.remove('btn-danger');

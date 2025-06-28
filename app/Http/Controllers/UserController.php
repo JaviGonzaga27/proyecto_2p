@@ -16,24 +16,34 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        // Validar el parámetro per_page
+        // Validar y obtener parámetros
         $perPage = $request->get('per_page', 10);
+        $search = $request->get('search');
+        $sortBy = $request->get('sort_by', 'created_at'); // Campo por defecto
+        $sortDirection = $request->get('sort_direction', 'desc'); // Dirección por defecto
 
-        // Validar que sea numérico y esté dentro de los valores permitidos
-        if (!is_numeric($perPage) || !in_array($perPage, [10, 25, 50])) {
-            $perPage = 10; // Valor por defecto
+        // Validar parámetros
+        if (!is_numeric($perPage) || !in_array($perPage, [10, 25, 50, 100])) {
+            $perPage = 10;
         }
 
-        // Convertir a entero para mayor seguridad
-        $perPage = (int) $perPage;
+        // Validar campos de ordenamiento permitidos
+        $allowedSortFields = ['id', 'name', 'email', 'created_at', 'updated_at', 'email_verified_at'];
+        if (!in_array($sortBy, $allowedSortFields)) {
+            $sortBy = 'created_at';
+        }
 
-        // Obtener término de búsqueda
-        $search = $request->get('search');
+        // Validar dirección de ordenamiento
+        if (!in_array($sortDirection, ['asc', 'desc'])) {
+            $sortDirection = 'desc';
+        }
+
+        $perPage = (int) $perPage;
 
         // Construir la consulta
         $query = User::select('id', 'name', 'email', 'created_at', 'updated_at', 'email_verified_at');
 
-        // Aplicar filtros de búsqueda si existe el término
+        // Aplicar filtros de búsqueda
         if (!empty($search)) {
             $searchTerm = '%' . $search . '%';
             $query->where(function($q) use ($searchTerm) {
@@ -42,16 +52,28 @@ class UserController extends Controller
             });
         }
 
-        // Ordenar por fecha de creación (más recientes primero)
-        $query->orderBy('created_at', 'desc');
+        // Aplicar ordenamiento
+        $query->orderBy($sortBy, $sortDirection);
 
-        // Ejecutar la consulta con paginación
+        // Ejecutar consulta con paginación
         $usuarios = $query->paginate($perPage);
 
-        // Mantener los parámetros de consulta en la paginación
+        // Mantener parámetros en la paginación
         $usuarios->appends($request->query());
 
-        return view('users.index', compact('usuarios', 'perPage'));
+        // Preparar datos para la vista
+        $tableOptions = [
+            'sort_by' => $sortBy,
+            'sort_direction' => $sortDirection,
+            'per_page_options' => [10, 25, 50, 100],
+            'total_records' => $usuarios->total(),
+            'current_page' => $usuarios->currentPage(),
+            'last_page' => $usuarios->lastPage(),
+            'from' => $usuarios->firstItem(),
+            'to' => $usuarios->lastItem(),
+        ];
+
+        return view('users.index', compact('usuarios', 'perPage', 'search', 'tableOptions'));
     }
 
     /**

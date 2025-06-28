@@ -154,6 +154,34 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Estado del Stock -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Estado del Inventario</h6>
+                    </div>
+                    <div class="card-body text-center">
+                        @if($producto->cantidad > 10)
+                            <div class="text-success mb-3">
+                                <i class="fas fa-check-circle fa-3x"></i>
+                            </div>
+                            <h6 class="text-success font-weight-bold">Stock Óptimo</h6>
+                            <p class="text-gray-600 small mb-0">El producto cuenta con suficiente inventario</p>
+                        @elseif($producto->cantidad > 0)
+                            <div class="text-warning mb-3">
+                                <i class="fas fa-exclamation-triangle fa-3x"></i>
+                            </div>
+                            <h6 class="text-warning font-weight-bold">Stock Bajo</h6>
+                            <p class="text-gray-600 small mb-0">Considera reabastecer pronto</p>
+                        @else
+                            <div class="text-danger mb-3">
+                                <i class="fas fa-times-circle fa-3x"></i>
+                            </div>
+                            <h6 class="text-danger font-weight-bold">Sin Stock</h6>
+                            <p class="text-gray-600 small mb-0">El producto no está disponible</p>
+                        @endif
+                    </div>
+                </div>
             </div>
 
             <!-- Información Adicional -->
@@ -196,35 +224,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Estado del Stock -->
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Estado del Inventario</h6>
-                    </div>
-                    <div class="card-body text-center">
-                        @if($producto->cantidad > 10)
-                            <div class="text-success mb-3">
-                                <i class="fas fa-check-circle fa-3x"></i>
-                            </div>
-                            <h6 class="text-success font-weight-bold">Stock Óptimo</h6>
-                            <p class="text-gray-600 small mb-0">El producto cuenta con suficiente inventario</p>
-                        @elseif($producto->cantidad > 0)
-                            <div class="text-warning mb-3">
-                                <i class="fas fa-exclamation-triangle fa-3x"></i>
-                            </div>
-                            <h6 class="text-warning font-weight-bold">Stock Bajo</h6>
-                            <p class="text-gray-600 small mb-0">Considera reabastecer pronto</p>
-                        @else
-                            <div class="text-danger mb-3">
-                                <i class="fas fa-times-circle fa-3x"></i>
-                            </div>
-                            <h6 class="text-danger font-weight-bold">Sin Stock</h6>
-                            <p class="text-gray-600 small mb-0">El producto no está disponible</p>
-                        @endif
-                    </div>
-                </div>
-
                 <!-- Acciones Rápidas -->
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
