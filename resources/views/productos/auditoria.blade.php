@@ -79,12 +79,6 @@
                             <option value="accion" {{ ($tableOptions['sort_by'] ?? '') == 'accion' ? 'selected' : '' }}>
                                 Acción
                             </option>
-                            <option value="producto_id" {{ ($tableOptions['sort_by'] ?? '') == 'producto_id' ? 'selected' : '' }}>
-                                Producto
-                            </option>
-                            <option value="user_id" {{ ($tableOptions['sort_by'] ?? '') == 'user_id' ? 'selected' : '' }}>
-                                Usuario
-                            </option>
                         </select>
                     </div>
 
@@ -193,17 +187,7 @@
                                     @endif
                                 </a>
                             </th>
-                            <th>
-                                <a href="{{ request()->fullUrlWithQuery(['sort_by' => 'usuario_id', 'sort_direction' => ($tableOptions['sort_by'] ?? '') == 'usuario_id' && ($tableOptions['sort_direction'] ?? 'desc') == 'asc' ? 'desc' : 'asc']) }}"
-                                    class="text-decoration-none text-dark">
-                                    Usuario
-                                    @if(($tableOptions['sort_by'] ?? '') == 'usuario_id')
-                                    <i class="fas fa-sort-{{ ($tableOptions['sort_direction'] ?? 'desc') == 'asc' ? 'up' : 'down' }} ml-1"></i>
-                                    @else
-                                    <i class="fas fa-sort text-muted ml-1"></i>
-                                    @endif
-                                </a>
-                            </th>
+                            <th>Usuario</th>
                             <th>Razón</th>
                             <th class="text-center">Detalles</th>
                         </tr>
