@@ -24,7 +24,7 @@ class ValidarStoreProducto extends FormRequest
     {
         return [
             'nombre' => 'required|unique:productos,nombre',
-            'codigo' => 'required|string|max:5|unique:productos,codigo',
+            'codigo' => 'required|stringunique:productos,codigo',
             'cantidad' => 'required|numeric|min:10|max:200',
             'precio' => 'required'
         ];
@@ -37,7 +37,6 @@ class ValidarStoreProducto extends FormRequest
             'nombre.unique' => 'El nombre del producto ya está en uso',
             'codigo.required' => 'El campo código es obligatorio',
             'codigo.string' => 'El campo código debe ser una cadena de texto',
-            'codigo.max' => 'El campo código no puede tener más de 5 caracteres',
             'codigo.unique' => 'El código del producto ya está en uso',
             'cantidad.required' => 'El campo cantidad es obligatorio',
             'cantidad.number' => 'El campo cantidad debe ser un número',

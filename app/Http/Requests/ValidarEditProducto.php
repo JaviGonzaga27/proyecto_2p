@@ -26,7 +26,7 @@ class ValidarEditProducto extends FormRequest
 
         return [
             'nombre' => 'required|unique:productos,nombre,' . $productoId,
-            'codigo' => 'required|string|max:5|unique:productos,codigo,' . $productoId,
+            'codigo' => 'required|string|unique:productos,codigo,' . $productoId,
             'cantidad' => 'required|numeric',
             'precio' => 'required',
         ];
@@ -39,7 +39,6 @@ class ValidarEditProducto extends FormRequest
             'nombre.unique' => 'El nombre del producto ya está en uso.',
             'codigo.required' => 'El código del producto es obligatorio.',
             'codigo.string' => 'El código debe ser una cadena de texto.',
-            'codigo.max' => 'El código no puede tener más de 5 caracteres.',
             'codigo.unique' => 'El código del producto ya está en uso.',
             'cantidad.required' => 'La cantidad del producto es obligatoria.',
             'cantidad.numeric' => 'La cantidad debe ser un número.',

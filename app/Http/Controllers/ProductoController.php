@@ -8,49 +8,49 @@ use App\Http\Requests\ValidarStoreProducto;
 use App\Http\Requests\ValidarEditProducto;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Services\AuditoriaService;
 use App\Models\AuditoriaProducto;
+use App\Http\Traits\PaginationTrait;
 
 class ProductoController extends Controller
 {
+    use PaginationTrait;
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        // Validar el parámetro per_page
-    $perPage = $request->get('per_page', 10);
+        // Obtener parámetros validados usando el trait
+        $params = $this->getPaginationParams($request, 'productos');
 
-    // Validar que sea numérico y esté dentro de los valores permitidos
-    if (!is_numeric($perPage) || !in_array($perPage, [10, 25, 50])) {
-        $perPage = 10; // Valor por defecto
-    }
+        // Construir la consulta
+        $query = Producto::select('id', 'nombre', 'codigo', 'cantidad', 'precio', 'created_at', 'updated_at');
 
-    // Convertir a entero para mayor seguridad
-    $perPage = (int) $perPage;
+        // Aplicar filtros de búsqueda
+        if (!empty($params['search'])) {
+            $searchTerm = '%' . $params['search'] . '%';
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('nombre', 'LIKE', $searchTerm)
+                    ->orWhere('codigo', 'LIKE', $searchTerm);
+            });
+        }
 
-    // Obtener término de búsqueda
-    $search = $request->get('search');
+        // Aplicar ordenamiento
+        $query->orderBy($params['sort_by'], $params['sort_direction']);
 
-    // Construir la consulta
-    $query = Producto::select('id', 'nombre', 'codigo', 'cantidad', 'precio', 'created_at', 'updated_at');
+        // Ejecutar consulta con paginación
+        $productos = $query->paginate($params['per_page']);
 
-    // Aplicar filtros de búsqueda si existe el término
-    if (!empty($search)) {
-        $searchTerm = '%' . $search . '%';
-        $query->where(function($q) use ($searchTerm) {
-            $q->where('nombre', 'LIKE', $searchTerm)
-              ->orWhere('codigo', 'LIKE', $searchTerm);
-        });
-    }
+        // Mantener parámetros en la paginación
+        $productos->appends($request->query());
 
-    // Ejecutar la consulta con paginación
-    $productos = $query->paginate($perPage);
+        // Preparar datos para la vista usando el trait
+        $tableOptions = $this->getTableOptions($productos, $params);
 
-    // Mantener los parámetros de consulta en la paginación
-    $productos->appends($request->query());
-
-    return view('productos.index', compact('productos', 'perPage'));
+        return view('productos.index', compact('productos', 'tableOptions'))
+            ->with('perPage', $params['per_page'])
+            ->with('search', $params['search']);
     }
 
     /**
@@ -77,7 +77,6 @@ class ProductoController extends Controller
 
             DB::commit();
             return redirect()->route('productos.index')->with('success', 'Producto creado correctamente');
-
         } catch (\Throwable $th) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Error al crear el producto: ' . $th->getMessage());
@@ -147,9 +146,43 @@ class ProductoController extends Controller
     /**
      * Display a listing of the deleted products.
      */
-    public function eliminados() {
-        $productosEliminados = Producto::onlyTrashed()->get();
-        return view('productos.eliminados', compact('productosEliminados'));
+    public function eliminados(Request $request)
+    {
+        // Obtener parámetros validados usando el trait
+        $params = $this->getPaginationParams($request, 'productos_eliminados');
+
+        // Construir la consulta para productos eliminados
+        $query = Producto::onlyTrashed()
+            ->select('id', 'nombre', 'codigo', 'cantidad', 'precio', 'created_at', 'updated_at', 'deleted_at');
+
+        // Aplicar filtros de búsqueda
+        if (!empty($params['search'])) {
+            $searchTerm = '%' . $params['search'] . '%';
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('nombre', 'LIKE', $searchTerm)
+                    ->orWhere('codigo', 'LIKE', $searchTerm);
+            });
+        }
+
+        // Aplicar ordenamiento (usar deleted_at como opción adicional)
+        $sortBy = $params['sort_by'];
+        if ($sortBy === 'created_at') {
+            $sortBy = 'deleted_at'; // Para productos eliminados, mostrar por fecha de eliminación
+        }
+        $query->orderBy($sortBy, $params['sort_direction']);
+
+        // Ejecutar consulta con paginación
+        $productosEliminados = $query->paginate($params['per_page']);
+
+        // Mantener parámetros en la paginación
+        $productosEliminados->appends($request->query());
+
+        // Preparar datos para la vista usando el trait
+        $tableOptions = $this->getTableOptions($productosEliminados, $params);
+
+        return view('productos.eliminados', compact('productosEliminados', 'tableOptions'))
+            ->with('perPage', $params['per_page'])
+            ->with('search', $params['search']);
     }
 
     /**
@@ -189,12 +222,52 @@ class ProductoController extends Controller
     /**
      * Display audit history for products.
      */
-    public function auditoria()
+    public function auditoria(Request $request)
     {
-        $auditorias = AuditoriaProducto::with(['usuario', 'producto'])
-            ->orderBy('fecha_evento', 'desc')
-            ->paginate(20);
+        // Obtener parámetros validados usando el trait
+        $params = $this->getPaginationParams($request, 'auditoria');
 
-        return view('productos.auditoria', compact('auditorias'));
+        // Construir la consulta
+        $query = AuditoriaProducto::with(['usuario', 'producto']);
+
+        // Aplicar filtros de búsqueda
+        if (!empty($params['search'])) {
+            $searchTerm = '%' . $params['search'] . '%';
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('accion', 'LIKE', $searchTerm)
+                    ->orWhere('razon', 'LIKE', $searchTerm)
+                    ->orWhereHas('usuario', function ($userQuery) use ($searchTerm) {
+                        $userQuery->where('name', 'LIKE', $searchTerm)
+                            ->orWhere('email', 'LIKE', $searchTerm);
+                    })
+                    ->orWhereHas('producto', function ($productQuery) use ($searchTerm) {
+                        $productQuery->where('nombre', 'LIKE', $searchTerm)
+                            ->orWhere('codigo', 'LIKE', $searchTerm);
+                    });
+            });
+        }
+
+        // Filtro por acción
+        $accion = $request->get('accion');
+        if (!empty($accion)) {
+            $query->where('accion', $accion);
+        }
+
+        // Aplicar ordenamiento
+        $query->orderBy($params['sort_by'], $params['sort_direction']);
+
+        // Ejecutar consulta con paginación
+        $auditorias = $query->paginate($params['per_page']);
+
+        // Mantener parámetros en la paginación
+        $auditorias->appends($request->query());
+
+        // Preparar datos para la vista usando el trait
+        $tableOptions = $this->getTableOptions($auditorias, $params);
+
+        return view('productos.auditoria', compact('auditorias', 'tableOptions'))
+            ->with('perPage', $params['per_page'])
+            ->with('search', $params['search'])
+            ->with('accion', $accion);
     }
 }

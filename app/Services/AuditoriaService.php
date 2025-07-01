@@ -22,7 +22,7 @@ class AuditoriaService
             'producto_id' => $productoId,
             'accion' => $accion,
             'razon' => $razon,
-            'user_id' => Auth::id(),
+            'user_id' => Auth::id() ?? 1, // Fallback al primer usuario si no hay autenticación
             'datos_antes' => $datosAntes,
             'datos_despues' => $datosDespues,
             'fecha_evento' => now()

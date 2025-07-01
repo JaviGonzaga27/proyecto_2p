@@ -8,72 +8,46 @@ use App\Http\Requests\ValidarStoreUser;
 use App\Http\Requests\ValidarEditUser;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Traits\PaginationTrait;
 
 class UserController extends Controller
 {
+    use PaginationTrait;
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        // Validar y obtener parámetros
-        $perPage = $request->get('per_page', 10);
-        $search = $request->get('search');
-        $sortBy = $request->get('sort_by', 'created_at'); // Campo por defecto
-        $sortDirection = $request->get('sort_direction', 'desc'); // Dirección por defecto
-
-        // Validar parámetros
-        if (!is_numeric($perPage) || !in_array($perPage, [10, 25, 50, 100])) {
-            $perPage = 10;
-        }
-
-        // Validar campos de ordenamiento permitidos
-        $allowedSortFields = ['id', 'name', 'email', 'created_at', 'updated_at', 'email_verified_at'];
-        if (!in_array($sortBy, $allowedSortFields)) {
-            $sortBy = 'created_at';
-        }
-
-        // Validar dirección de ordenamiento
-        if (!in_array($sortDirection, ['asc', 'desc'])) {
-            $sortDirection = 'desc';
-        }
-
-        $perPage = (int) $perPage;
+        // Obtener parámetros validados usando el trait
+        $params = $this->getPaginationParams($request, 'users');
 
         // Construir la consulta
         $query = User::select('id', 'name', 'email', 'created_at', 'updated_at', 'email_verified_at');
 
         // Aplicar filtros de búsqueda
-        if (!empty($search)) {
-            $searchTerm = '%' . $search . '%';
-            $query->where(function($q) use ($searchTerm) {
+        if (!empty($params['search'])) {
+            $searchTerm = '%' . $params['search'] . '%';
+            $query->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'LIKE', $searchTerm)
-                  ->orWhere('email', 'LIKE', $searchTerm);
+                    ->orWhere('email', 'LIKE', $searchTerm);
             });
         }
 
         // Aplicar ordenamiento
-        $query->orderBy($sortBy, $sortDirection);
+        $query->orderBy($params['sort_by'], $params['sort_direction']);
 
         // Ejecutar consulta con paginación
-        $usuarios = $query->paginate($perPage);
+        $usuarios = $query->paginate($params['per_page']);
 
         // Mantener parámetros en la paginación
         $usuarios->appends($request->query());
 
-        // Preparar datos para la vista
-        $tableOptions = [
-            'sort_by' => $sortBy,
-            'sort_direction' => $sortDirection,
-            'per_page_options' => [10, 25, 50, 100],
-            'total_records' => $usuarios->total(),
-            'current_page' => $usuarios->currentPage(),
-            'last_page' => $usuarios->lastPage(),
-            'from' => $usuarios->firstItem(),
-            'to' => $usuarios->lastItem(),
-        ];
+        // Preparar datos para la vista usando el trait
+        $tableOptions = $this->getTableOptions($usuarios, $params);
 
-        return view('users.index', compact('usuarios', 'perPage', 'search', 'tableOptions'));
+        return view('users.index', compact('usuarios', 'tableOptions'))
+            ->with('perPage', $params['per_page'])
+            ->with('search', $params['search']);
     }
 
     /**
