@@ -2,7 +2,6 @@
 <html lang="es">
 
 <head>
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -19,10 +18,6 @@
 
     <!-- Custom styles for this template-->
     <link href="{{ asset('css/sb-admin-2.min.css') }}" rel="stylesheet">
-
-    <!-- Custom styles for this page -->
-    <!--<link href="{{ asset('vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet"> -->
-
 </head>
 
 <body id="page-top">
@@ -202,19 +197,7 @@
                     </ul>
 
                 </nav>
-                <!-- End of Topbar -->
 
-                <!-- Begin Page Content -->
-
-                <!-- @if ($errors->any())
-                    <div class="container alert alert-danger">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-<li>{{ $error }}</li>
-@endforeach
-                        </ul>
-                    </div>
-                @endif -->
                 @yield('content')
                 <!-- /.container-fluid -->
 
@@ -225,7 +208,7 @@
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2025</span>
+                        <span>Copyright &copy; 2025</span>
                     </div>
                 </div>
             </footer>
@@ -233,7 +216,6 @@
 
         </div>
         <!-- End of Content Wrapper -->
-
     </div>
     <!-- End of Page Wrapper -->
 
@@ -253,14 +235,6 @@
     <!-- Page level custom scripts -->
     <script src="{{ asset('js/demo/chart-area-demo.js') }}"></script>
     <script src="{{ asset('js/demo/chart-pie-demo.js') }}"></script>
-
-    <!-- Page level plugins -->
-    <!--<script src="{{ asset('vendor/datatables/jquery.dataTables.min.js') }}"></script>-->
-    <!--<script src="{{ asset('vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>-->
-
-    <!-- Page level custom scripts -->
-    <!--<script src="{{ asset('js/demo/datatables-demo.js') }}"></script>-->
-
 </body>
 
 </html>
