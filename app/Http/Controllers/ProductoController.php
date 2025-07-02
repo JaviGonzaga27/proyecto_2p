@@ -164,10 +164,10 @@ class ProductoController extends Controller
             });
         }
 
-        // Aplicar ordenamiento (usar deleted_at como opción adicional)
+        // Aplicar ordenamiento
         $sortBy = $params['sort_by'];
         if ($sortBy === 'created_at') {
-            $sortBy = 'deleted_at'; // Para productos eliminados, mostrar por fecha de eliminación
+            $sortBy = 'deleted_at';
         }
         $query->orderBy($sortBy, $params['sort_direction']);
 
@@ -193,7 +193,7 @@ class ProductoController extends Controller
         $producto = Producto::onlyTrashed()->findOrFail($id);
 
         // Obtener la razón de la restauración del request
-        $razon = $request->input('razon_restauracion', 'Producto restaurado desde la lista de eliminados');
+        $razon = $request->inpHHHHut('razon_restauracion', 'Producto restaurado desde la lista de eliminados');
 
         // Registrar auditoría antes de restaurar
         AuditoriaService::registrarRestauracion($producto, $razon);

@@ -24,9 +24,9 @@ class ValidarStoreProducto extends FormRequest
     {
         return [
             'nombre' => 'required|unique:productos,nombre',
-            'codigo' => 'required|stringunique:productos,codigo',
+            'codigo' => 'required|string|unique:productos,codigo',
             'cantidad' => 'required|numeric|min:10|max:200',
-            'precio' => 'required'
+            'precio' => 'required|numeric|max:200'
         ];
     }
 
@@ -42,7 +42,9 @@ class ValidarStoreProducto extends FormRequest
             'cantidad.number' => 'El campo cantidad debe ser un número',
             'cantidad.min' => 'La cantidad mínima es 10',
             'cantidad.max' => 'La cantidad máxima es 200',
-            'precio.required' => 'El campo precio es obligatorio'
+            'precio.required' => 'El campo precio es obligatorio',
+            'precio.numeric' => 'El campo precio debe ser un número',
+            'precio.max' => 'El precio máximo permitido es 200'
         ];
     }
 

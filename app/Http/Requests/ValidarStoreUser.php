@@ -65,9 +65,12 @@ class ValidarStoreUser extends FormRequest
 
     public function prepareForValidation(): void
     {
+        $name = $this->name ?? '';
+        $email = $this->email ?? '';
+        
         $this->merge([
-            'name' => trim($this->name),
-            'email' => strtolower(trim($this->email)),
+            'name' => trim($name),
+            'email' => strtolower(trim($email)),
         ]);
     }
 }
